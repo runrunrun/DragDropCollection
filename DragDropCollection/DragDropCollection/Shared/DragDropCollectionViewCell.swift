@@ -75,7 +75,6 @@ extension DragDropCollectionViewCell: UIGestureRecognizerDelegate {
         return false
     }
     
-    
     func dragging(gesture: UIGestureRecognizer) {
         if gesture.state == .began {
             guard let view = gesture.view else {

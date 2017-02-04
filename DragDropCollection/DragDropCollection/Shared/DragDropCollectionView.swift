@@ -36,6 +36,9 @@ extension DragDropCollectionView: DragDropCollectionViewCellDelegate {
     func willBeginDragging(cell: DragDropCollectionViewCell) {
         isEditingCells = true
         
+        // Disable Scrolling
+        self.isScrollEnabled = false
+        
         // Replace cell with screenshot
         cellScreenShot.alpha = 1.0
         cellScreenShot.image = cell.screenShot()
@@ -79,6 +82,12 @@ extension DragDropCollectionView: DragDropCollectionViewCellDelegate {
     func didDrag(cell: DragDropCollectionViewCell, to center: CGPoint) {
         // Move cell screenshot
         cellScreenShot.center = center
+        
+        // Scroll Screen if needed
+        var scrollRect = cellScreenShot.frame
+        scrollRect.size.height += 100
+        scrollRect.origin.y -= scrollRect.height/2
+        self.scrollRectToVisible(scrollRect, animated: false)
         
         // Detect cell to move
         var movingCellIndex: IndexPath?
