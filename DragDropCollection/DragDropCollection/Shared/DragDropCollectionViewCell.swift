@@ -18,13 +18,23 @@ class DragDropCollectionViewCell: UICollectionViewCell {
     fileprivate let vibrateAnimationKey = "vibrate"
     fileprivate var initialCenter: CGPoint?
     fileprivate var gestureDistanceFromCenter: CGSize?
-    
     weak var delegate: DragDropCollectionViewCellDelegate?
+    private var closeButton = UIButton(type: UIButtonType.custom)
+    private let deleteWidth: CGFloat = 20
     
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
     override func didMoveToWindow() {
         super.didMoveToWindow()
         
+        self.clipsToBounds = false
+
+        self.addSubview(closeButton)
+        closeButton.addTarget(self, action: #selector(deleteButtonPressed), for: .touchUpInside)
+        closeButton.backgroundColor = UIColor.green
+
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(dragging(gesture:)))
         addGestureRecognizer(longPress)
         longPress.delegate = self
@@ -32,6 +42,20 @@ class DragDropCollectionViewCell: UICollectionViewCell {
         let panning = UIPanGestureRecognizer(target: self, action: #selector(dragging(gesture:)))
         addGestureRecognizer(panning)
         panning.delegate = self
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let deleteOffset = deleteWidth/2
+        contentView.frame = CGRect(x: deleteOffset, y: deleteOffset, width: bounds.width - deleteOffset, height: bounds.height - deleteOffset)
+    }
+    
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let point = closeButton.convert(point, from: self)
+        if closeButton.bounds.contains(point) {
+            return closeButton
+        }
+        return super.hitTest(point, with: event)
     }
     
     var isEditing: Bool = false {
@@ -60,6 +84,22 @@ class DragDropCollectionViewCell: UICollectionViewCell {
             layer.removeAnimation(forKey: vibrateAnimationKey)
         }
     }
+    
+    fileprivate func showDelete(_ show: Bool) {
+        self.bringSubview(toFront: closeButton)
+        let width = deleteWidth
+        let frame = show ? CGRect(x: 0, y: 0, width: width, height: width) : CGRect.zero
+        self.closeButton.layer.cornerRadius = width/2
+        UIView.animate(withDuration: 0.2, animations: {
+            self.closeButton.frame = frame
+        }) { (done) in
+            
+        }
+    }
+    
+    func deleteButtonPressed() {
+        print("Delete pressed.")
+    }
 }
 
 extension DragDropCollectionViewCell: UIGestureRecognizerDelegate {
@@ -80,11 +120,15 @@ extension DragDropCollectionViewCell: UIGestureRecognizerDelegate {
             guard let view = gesture.view else {
                 return
             }
+
+            // Show delete button
+            showDelete(true)
             
             delegate?.willBeginDragging(cell: self)
             
             // Stop vibrating
             vibrate(false)
+            
             
             let gesturePosition = gesture.location(in: view.superview)
             let distanceFromCenterX = view.center.x - gesturePosition.x
