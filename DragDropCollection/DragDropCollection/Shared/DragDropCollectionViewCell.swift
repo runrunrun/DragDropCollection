@@ -29,12 +29,14 @@ class DragDropCollectionViewCell: UICollectionViewCell {
     override func didMoveToWindow() {
         super.didMoveToWindow()
         
-        self.clipsToBounds = false
-
+        // Setup close button
         self.addSubview(closeButton)
         closeButton.addTarget(self, action: #selector(deleteButtonPressed), for: .touchUpInside)
-        closeButton.backgroundColor = UIColor.green
-
+        closeButton.setImage(UIImage(named: "close"), for: .normal)
+        closeButton.imageEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5)
+        closeButton.imageView?.contentMode = .scaleAspectFit
+        closeButton.clipsToBounds = true
+        
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(dragging(gesture:)))
         addGestureRecognizer(longPress)
         longPress.delegate = self
@@ -89,12 +91,17 @@ class DragDropCollectionViewCell: UICollectionViewCell {
         self.bringSubview(toFront: closeButton)
         let width = deleteWidth
         let frame = show ? CGRect(x: 0, y: 0, width: width, height: width) : CGRect.zero
+        self.closeButton.frame = frame
+
+        // Add blurEffect
+        let blurEffect = UIBlurEffect(style: .prominent)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.frame = frame
+        blurView.clipsToBounds = true
+        closeButton.insertSubview(blurView, at: 0)
+        
+        blurView.layer.cornerRadius = width/2
         self.closeButton.layer.cornerRadius = width/2
-        UIView.animate(withDuration: 0.2, animations: {
-            self.closeButton.frame = frame
-        }) { (done) in
-            
-        }
     }
     
     func deleteButtonPressed() {
