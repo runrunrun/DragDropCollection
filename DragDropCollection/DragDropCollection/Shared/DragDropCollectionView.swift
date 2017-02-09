@@ -8,11 +8,16 @@
 
 import UIKit
 
+protocol DragDropActionDelegate: class {
+    func deleteCell(at indexPath: IndexPath)
+}
+
 class DragDropCollectionView: UICollectionView {
     fileprivate var isEditingCells = false
     fileprivate var cellScreenShot = UIImageView()
     fileprivate let scaleValue = 1.2
     fileprivate let scaleDuration = 0.1
+    weak var actionDelegate: DragDropActionDelegate?
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
@@ -113,6 +118,13 @@ extension DragDropCollectionView: DragDropCollectionViewCellDelegate {
             }
         }
     }
+    
+    func delete(cell: DragDropCollectionViewCell) {
+        if let indexPath = self.indexPathForItem(at: cell.center) {
+            actionDelegate?.deleteCell(at: indexPath)
+        }
+    }
+
     
     // Update UI for edit state
     func updateEditState(_ edit: Bool) {

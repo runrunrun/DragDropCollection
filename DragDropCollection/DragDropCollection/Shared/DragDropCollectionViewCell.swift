@@ -12,6 +12,7 @@ protocol DragDropCollectionViewCellDelegate: class {
     func willBeginDragging(cell: DragDropCollectionViewCell)
     func didEndDragging(cell: DragDropCollectionViewCell)
     func didDrag(cell: DragDropCollectionViewCell, to center: CGPoint)
+    func delete(cell: DragDropCollectionViewCell)
 }
 
 class DragDropCollectionViewCell: UICollectionViewCell {
@@ -63,6 +64,7 @@ class DragDropCollectionViewCell: UICollectionViewCell {
     var isEditing: Bool = false {
         didSet {
             vibrate(isEditing)
+            showDelete(isEditing)
         }
     }
     
@@ -91,7 +93,7 @@ class DragDropCollectionViewCell: UICollectionViewCell {
         self.bringSubview(toFront: closeButton)
         let width = deleteWidth
         let frame = show ? CGRect(x: 0, y: 0, width: width, height: width) : CGRect.zero
-        self.closeButton.frame = frame
+        closeButton.frame = frame
 
         // Add blurEffect
         let blurEffect = UIBlurEffect(style: .prominent)
@@ -100,12 +102,18 @@ class DragDropCollectionViewCell: UICollectionViewCell {
         blurView.clipsToBounds = true
         closeButton.insertSubview(blurView, at: 0)
         
+        // Fix close image hidding behide blurView
+        if let imageView = closeButton.imageView {
+            closeButton.bringSubview(toFront: imageView)
+        }
+        
         blurView.layer.cornerRadius = width/2
-        self.closeButton.layer.cornerRadius = width/2
+        closeButton.layer.cornerRadius = width/2
     }
     
     func deleteButtonPressed() {
         print("Delete pressed.")
+        delegate?.delete(cell: self)
     }
 }
 

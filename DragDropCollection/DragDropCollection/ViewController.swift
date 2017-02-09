@@ -10,10 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
     @IBOutlet weak var collectionView: DragDropCollectionView!
-
+    var numberOfItems = 50
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        collectionView.actionDelegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -34,7 +35,7 @@ extension ViewController: UICollectionViewDelegate {
 
 extension ViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 50
+        return numberOfItems
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -42,6 +43,17 @@ extension ViewController: UICollectionViewDataSource {
         cell.titleLabel.text = "Cell\(indexPath.row)"
         
         return cell
+    }
+}
+
+extension ViewController: DragDropActionDelegate {
+    func deleteCell(at indexPath: IndexPath) {
+        numberOfItems -= 1
+        
+        collectionView.performBatchUpdates({
+            self.collectionView.deleteItems(at: [indexPath])
+        }) { (done) in
+        }
     }
 }
 
