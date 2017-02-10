@@ -11,4 +11,10 @@ import UIKit
 class CollectionViewCell: DragDropCollectionViewCell {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var containerView: UIView!
+    
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // Remove jagged edges
+        containerView.layer.allowsEdgeAntialiasing = true
+    }
 }
